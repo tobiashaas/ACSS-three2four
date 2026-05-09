@@ -27,8 +27,8 @@ class ACSS_Admin_Page {
 		}
 
 		$base = plugin_dir_url( ACSS3TO4_FILE );
-		wp_enqueue_style( 'acss3to4-admin', $base . 'assets/admin.css', [], '1.0.0' );
-		wp_enqueue_script( 'acss3to4-admin', $base . 'assets/admin.js', [], '1.0.0', true );
+		wp_enqueue_style( 'acss3to4-admin', $base . 'assets/admin.css', [], ACSS3TO4_VERSION );
+		wp_enqueue_script( 'acss3to4-admin', $base . 'assets/admin.js', [], ACSS3TO4_VERSION, true );
 		wp_localize_script(
 			'acss3to4-admin',
 			'acss3to4',

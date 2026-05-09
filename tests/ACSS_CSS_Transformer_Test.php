@@ -56,6 +56,13 @@ class ACSS_CSS_Transformer_Test extends TestCase {
 		$this->assertSame( 0, $r['flagged'] );
 	}
 
+	public function test_hsl_component_call_with_trailing_whitespace_before_paren(): void {
+		$r = $this->t->transform( 'color: hsl(var(--primary-h), var(--primary-s)%, var(--primary-l)% );' );
+		$this->assertStringContainsString( 'var(--primary)', $r['css'] );
+		$this->assertSame( 1, $r['converted'] );
+		$this->assertSame( 0, $r['flagged'] );
+	}
+
 	public function test_hsla_component_call_with_alpha(): void {
 		$r = $this->t->transform( 'color: hsla(var(--primary-h), var(--primary-s)%, var(--primary-l)%, 0.3);' );
 		$this->assertStringContainsString( 'color-mix(in oklch, var(--primary) 30%, transparent)', $r['css'] );

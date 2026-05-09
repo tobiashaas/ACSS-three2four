@@ -46,12 +46,29 @@ Run tests:
 php vendor/bin/phpunit
 ```
 
+Lint project PHP files:
+
+```bash
+composer lint
+```
+
+## Updates
+
+The plugin can check for updates from public GitHub releases for `tobiashaas/ACSS-three2four`. Publish a new GitHub release with a packaged ZIP asset and WordPress installations using the plugin will be able to update from the dashboard.
+
+## Releasing
+
+1. Bump the version in `acss3-to-4.php` and `readme.txt`.
+2. Push the commit and create a GitHub release/tag.
+3. The `Release` workflow builds a distributable ZIP and attaches it to the GitHub release.
+
 ## Project Structure
 
 - `acss3-to-4.php` plugin bootstrap
 - `includes/` migration logic, admin page, and AJAX handlers
+- `includes/vendor/plugin-update-checker/` vendored GitHub updater library
 - `assets/` admin JavaScript and CSS
-- `tests/` PHPUnit coverage for the CSS transformer and migration behavior
+- `tests/` PHPUnit coverage for transformer, migrators, updater, and WordPress-facing behavior
 
 ## License
 

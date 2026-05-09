@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  build-zip:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build distributable ZIP
+        shell: bash
+        run: |
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          STAGE_DIR="dist/acss3-to-4"
+          ZIP_PATH="dist/acss3-to-4-${TAG_NAME}.zip"
+
+          mkdir -p "$STAGE_DIR"
+          rsync -av ./ "$STAGE_DIR"/ --exclude-from=".distignore"
+          cd "$STAGE_DIR"
+          zip -r "../$(basename "$ZIP_PATH")" .
+
+      - name: Upload release ZIP
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip

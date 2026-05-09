@@ -2,7 +2,8 @@
 /**
  * Plugin Name: ACSS3 to ACSS4
  * Description: Migrates Automatic.css v2/v3 data to v4 format in Bricks Builder sites.
- * Version:     1.0.0
+ * Version:     1.0.1
+ * Update URI:  https://github.com/tobiashaas/ACSS-three2four/
  * Requires at least: 6.0
  * Requires PHP: 8.0
  * Author:      Tobias Haas
@@ -14,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'ACSS3TO4_FILE', __FILE__ );
+define( 'ACSS3TO4_VERSION', '1.0.1' );
 
 require_once __DIR__ . '/includes/ACSS_CSS_Transformer.php';
 require_once __DIR__ . '/includes/Migrators/ACSS_Settings_Migrator.php';
@@ -22,10 +24,19 @@ require_once __DIR__ . '/includes/Migrators/ACSS_Global_Classes_Migrator.php';
 require_once __DIR__ . '/includes/Admin/ACSS_Admin_Page.php';
 require_once __DIR__ . '/includes/Admin/ACSS_Ajax_Handler.php';
 require_once __DIR__ . '/includes/ACSS_Plugin.php';
+require_once __DIR__ . '/includes/ACSS_Updater.php';
+
+$updater = __DIR__ . '/includes/vendor/plugin-update-checker/plugin-update-checker.php';
+
+if ( file_exists( $updater ) ) {
+	require_once $updater;
+}
 
 add_action(
 	'plugins_loaded',
 	function () {
+		( new ACSS_Updater( ACSS3TO4_FILE ) )->register();
+
 		$transformer = new ACSS_CSS_Transformer();
 
 		$plugin = new ACSS_Plugin(

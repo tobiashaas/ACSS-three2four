@@ -1,0 +1,11 @@
+.git/
+.github/
+docs/
+tests/
+vendor/
+.gitignore
+agent.md
+composer.json
+composer.lock
+phpunit.xml
+.phpunit.result.cache

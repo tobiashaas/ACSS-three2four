@@ -30,7 +30,7 @@ class ACSS_Settings_Migrator {
 
 			update_option( 'automatic_css_db_version', ACSS_PLUGIN_VERSION );
 		} catch ( \Throwable $e ) {
-			if ( false !== stripos( get_class( $e ), 'CSS_Generation' ) || false !== stripos( $e->getMessage(), 'CSS' ) ) {
+			if ( false !== stripos( get_class( $e ), 'CSS_Generation' ) ) {
 				update_option( 'automatic_css_db_version', ACSS_PLUGIN_VERSION );
 
 				return [

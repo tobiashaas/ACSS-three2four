@@ -2,6 +2,8 @@
 
 use PHPUnit\Framework\TestCase;
 
+final class ACSS_CSS_Generation_Exception extends RuntimeException {}
+
 final class ACSS_Migrators_Test extends TestCase {
 
 	protected function setUp(): void {
@@ -27,6 +29,40 @@ final class ACSS_Migrators_Test extends TestCase {
 
 		$this->assertFalse( $result['success'] );
 		$this->assertSame( '4.0.0', get_option( 'automatic_css_db_version' ) );
+	}
+
+	public function test_settings_migrator_only_treats_css_generation_exception_as_soft_failure(): void {
+		if ( ! defined( 'ACSS_PLUGIN_VERSION' ) ) {
+			define( 'ACSS_PLUGIN_VERSION', '4.0.1' );
+		}
+
+		update_option( 'automatic_css_db_version', '4.0.0' );
+		$GLOBALS['acss_test_action_callbacks']['automaticcss_update_plugin_start'] = static function (): void {
+			throw new RuntimeException( 'CSS parsing failed unexpectedly.' );
+		};
+
+		$migrator = new ACSS_Settings_Migrator();
+		$result   = $migrator->run();
+
+		$this->assertFalse( $result['success'] );
+		$this->assertSame( '4.0.0', get_option( 'automatic_css_db_version' ) );
+	}
+
+	public function test_settings_migrator_keeps_success_for_css_generation_exception(): void {
+		if ( ! defined( 'ACSS_PLUGIN_VERSION' ) ) {
+			define( 'ACSS_PLUGIN_VERSION', '4.0.1' );
+		}
+
+		update_option( 'automatic_css_db_version', '4.0.0' );
+		$GLOBALS['acss_test_action_callbacks']['automaticcss_update_plugin_start'] = static function (): void {
+			throw new ACSS_CSS_Generation_Exception( 'Generation failed.' );
+		};
+
+		$migrator = new ACSS_Settings_Migrator();
+		$result   = $migrator->run();
+
+		$this->assertTrue( $result['success'] );
+		$this->assertSame( '4.0.1', get_option( 'automatic_css_db_version' ) );
 	}
 
 	public function test_elements_migrator_updates_nested_css_blocks(): void {
