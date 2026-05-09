@@ -1,0 +1,46 @@
+#acss3to4-steps {
+	margin: 20px 0;
+}
+
+.acss3to4-step {
+	padding: 8px 0;
+	font-size: 14px;
+}
+
+.step-status { font-weight: bold; margin-right: 6px; }
+.step-status--running { color: #2271b1; }
+.step-status--done    { color: #1a7a2a; }
+.step-status--error   { color: #d63638; }
+
+.step-progress { color: #646970; font-size: 12px; }
+
+#acss3to4-log {
+	margin-top: 24px;
+	background: #1d2327;
+	padding: 12px 16px;
+	border-radius: 4px;
+	max-width: 800px;
+}
+
+#acss3to4-log h3 {
+	color: #fff;
+	margin-top: 0;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+#acss3to4-log-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-family: monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.log-success { color: #68de7c; }
+.log-warning { color: #f0c33c; }
+.log-error   { color: #f86368; }
+
+#acss3to4-done { margin-top: 20px; }
