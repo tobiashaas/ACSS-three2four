@@ -37,7 +37,7 @@ class ACSS_Admin_Page {
 	}
 
 	public function enqueue_assets( string $hook ): void {
-		if ( 'tools_page_acss3-to-4' !== $hook ) {
+		if ( ! in_array( $hook, [ 'tools_page_acss3-to-4', 'automatic-css_page_acss3-to-4' ], true ) ) {
 			return;
 		}
 

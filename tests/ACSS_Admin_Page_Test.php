@@ -43,6 +43,15 @@ final class ACSS_Admin_Page_Test extends TestCase {
 		$this->assertSame( 'test-nonce', $GLOBALS['acss_test_localized']['acss3to4-admin']['l10n']['nonce'] ?? null );
 	}
 
+	public function test_enqueue_assets_on_acss_submenu_screen(): void {
+		$page = new ACSS_Admin_Page();
+
+		$page->enqueue_assets( 'automatic-css_page_acss3-to-4' );
+
+		$this->assertArrayHasKey( 'acss3to4-admin', $GLOBALS['acss_test_scripts'] );
+		$this->assertArrayHasKey( 'acss3to4-admin', $GLOBALS['acss_test_localized'] );
+	}
+
 	public function test_add_menu_page_uses_acss_submenu_when_acss_is_active(): void {
 		$page = new class() extends ACSS_Admin_Page {
 			protected function is_acss_active(): bool {

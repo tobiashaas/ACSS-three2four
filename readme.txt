@@ -3,7 +3,7 @@ Contributors: tobiashaas
 Requires at least: 6.0
 Requires PHP: 8.0
 Tested up to: 6.8
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -54,6 +54,10 @@ Standalone color channel variables such as `--primary-h`, `--primary-r`, or simi
 Yes. The migration updates WordPress options and post meta in place.
 
 == Changelog ==
+
+= 1.0.3 =
+
+* Fix the migration screen scripts not loading on the ACSS submenu page.
 
 = 1.0.2 =
 
