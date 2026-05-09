@@ -20,6 +20,8 @@ class ACSS_Settings_Migrator {
 			return [ 'success' => false, 'message' => 'ACSS4 not found — ACSS_PLUGIN_VERSION undefined.' ];
 		}
 
+		$previous_version = (string) get_option( 'automatic_css_db_version', '' );
+
 		try {
 			delete_transient( 'automaticcss_database_upgrade_lock' );
 			update_option( 'automatic_css_db_version', '2.0.0' );
@@ -28,14 +30,16 @@ class ACSS_Settings_Migrator {
 
 			update_option( 'automatic_css_db_version', ACSS_PLUGIN_VERSION );
 		} catch ( \Throwable $e ) {
-			update_option( 'automatic_css_db_version', ACSS_PLUGIN_VERSION );
-
 			if ( false !== stripos( get_class( $e ), 'CSS_Generation' ) || false !== stripos( $e->getMessage(), 'CSS' ) ) {
+				update_option( 'automatic_css_db_version', ACSS_PLUGIN_VERSION );
+
 				return [
 					'success' => true,
 					'message' => 'ACSS settings migrated. CSS regeneration failed — please regenerate manually from the ACSS dashboard.',
 				];
 			}
+
+			update_option( 'automatic_css_db_version', $previous_version );
 
 			return [ 'success' => false, 'message' => 'Error: ' . $e->getMessage() ];
 		}

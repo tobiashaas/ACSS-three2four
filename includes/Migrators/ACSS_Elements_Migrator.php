@@ -85,18 +85,12 @@ class ACSS_Elements_Migrator {
 				$modified = false;
 
 				foreach ( $elements as &$element ) {
-					if ( ! isset( $element['settings']['_css'] ) || '' === $element['settings']['_css'] ) {
-						continue;
-					}
+					$element_modified = false;
+					$result           = $this->transform_element( $element, $element_modified );
 
-					$result = $this->transformer->transform( $element['settings']['_css'] );
-
-					if ( $result['converted'] > 0 || $result['flagged'] > 0 ) {
-						$element['settings']['_css'] = $result['css'];
-						$converted                  += $result['converted'];
-						$post_flagged               += $result['flagged'];
-						$modified                    = true;
-					}
+					$converted    += $result['converted'];
+					$post_flagged += $result['flagged'];
+					$modified      = $modified || $element_modified;
 				}
 				unset( $element );
 
@@ -117,6 +111,45 @@ class ACSS_Elements_Migrator {
 			'converted'   => $converted,
 			'flagged'     => $flagged,
 			'flagged_ids' => $flagged_ids,
+		];
+	}
+
+	/**
+	 * @param array<string, mixed> $element
+	 * @param bool                 $modified Set to true when the element tree changes.
+	 * @return array{converted: int, flagged: int}
+	 */
+	private function transform_element( array &$element, bool &$modified ): array {
+		$converted = 0;
+		$flagged   = 0;
+
+		if ( isset( $element['settings']['_css'] ) && '' !== $element['settings']['_css'] ) {
+			$result = $this->transformer->transform( $element['settings']['_css'] );
+
+			if ( $result['converted'] > 0 || $result['flagged'] > 0 ) {
+				$element['settings']['_css'] = $result['css'];
+				$converted                  += $result['converted'];
+				$flagged                    += $result['flagged'];
+				$modified                    = true;
+			}
+		}
+
+		if ( isset( $element['children'] ) && is_array( $element['children'] ) ) {
+			foreach ( $element['children'] as &$child ) {
+				if ( ! is_array( $child ) ) {
+					continue;
+				}
+
+				$child_result = $this->transform_element( $child, $modified );
+				$converted   += $child_result['converted'];
+				$flagged     += $child_result['flagged'];
+			}
+			unset( $child );
+		}
+
+		return [
+			'converted' => $converted,
+			'flagged'   => $flagged,
 		];
 	}
 }

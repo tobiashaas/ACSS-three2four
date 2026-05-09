@@ -52,7 +52,7 @@ class ACSS_Global_Classes_Migrator {
 			if ( isset( $class['settings']['css'] ) && '' !== $class['settings']['css'] ) {
 				$result = $this->transformer->transform( $class['settings']['css'] );
 
-				if ( $result['converted'] > 0 ) {
+				if ( $result['converted'] > 0 || $result['flagged'] > 0 ) {
 					$class['settings']['css'] = $result['css'];
 				}
 			}
