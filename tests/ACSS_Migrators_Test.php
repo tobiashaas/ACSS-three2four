@@ -14,6 +14,20 @@ final class ACSS_Migrators_Test extends TestCase {
 		$GLOBALS['acss_test_postmeta']         = [];
 	}
 
+	public function test_settings_migrator_uses_supported_db_version_when_plugin_constant_is_missing(): void {
+		$this->assertFalse( defined( 'ACSS_PLUGIN_VERSION' ) );
+
+		update_option( 'automatic_css_db_version', '4.0.0-rc-1' );
+
+		$migrator = new ACSS_Settings_Migrator();
+		$result   = $migrator->run();
+
+		$this->assertTrue( $result['success'] );
+		$this->assertSame( '4.0.0-rc-1', get_option( 'automatic_css_db_version' ) );
+		$this->assertSame( 'automaticcss_update_plugin_start', $GLOBALS['acss_test_actions'][0]['hook'] );
+		$this->assertSame( [ '4.0.0-rc-1', '2.0.0' ], $GLOBALS['acss_test_actions'][0]['args'] );
+	}
+
 	public function test_settings_migrator_keeps_previous_db_version_on_hard_failure(): void {
 		if ( ! defined( 'ACSS_PLUGIN_VERSION' ) ) {
 			define( 'ACSS_PLUGIN_VERSION', '4.0.1' );
