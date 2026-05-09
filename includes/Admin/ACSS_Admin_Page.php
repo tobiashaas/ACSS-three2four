@@ -6,12 +6,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class ACSS_Admin_Page {
 
+	private const ACSS_PARENT_SLUG = 'automatic-css';
+
 	public function register(): void {
 		add_action( 'admin_menu', [ $this, 'add_menu_page' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
 
 	public function add_menu_page(): void {
+		if ( $this->is_acss_active() ) {
+			add_submenu_page(
+				$this->get_acss_parent_slug(),
+				'ACSS3 to ACSS4',
+				'ACSS3 to ACSS4',
+				'manage_options',
+				'acss3-to-4',
+				[ $this, 'render_page' ]
+			);
+
+			return;
+		}
+
 		add_management_page(
 			'ACSS3 to ACSS4',
 			'ACSS3 to ACSS4',
@@ -108,9 +123,7 @@ class ACSS_Admin_Page {
 	 * @return array{blocking: bool, message: string, warning: string}
 	 */
 	private function check_prerequisites(): array {
-		$acss_active = defined( 'ACSS_PLUGIN_FILE' ) || class_exists( 'Automatic_CSS\Plugin' );
-
-		if ( ! $acss_active ) {
+		if ( ! $this->is_acss_active() ) {
 			return [
 				'blocking' => true,
 				'message'  => 'ACSS not found. Please install and activate ACSS4 first.',
@@ -120,7 +133,7 @@ class ACSS_Admin_Page {
 
 		$version = (string) get_option( 'automatic_css_db_version', '' );
 
-		if ( '' !== $version && version_compare( $version, '4.0.0', '<' ) ) {
+		if ( '' !== $version && ! $this->is_supported_acss_version( $version ) ) {
 			return [
 				'blocking' => true,
 				'message'  => 'ACSS3 detected (version ' . $version . '). Please update the ACSS plugin to version 4 first, then return here.',
@@ -139,5 +152,19 @@ class ACSS_Admin_Page {
 			'message'  => '',
 			'warning'  => $warning,
 		];
+	}
+
+	protected function is_acss_active(): bool {
+		return defined( 'ACSS_PLUGIN_FILE' ) || class_exists( 'Automatic_CSS\Plugin' );
+	}
+
+	protected function get_acss_parent_slug(): string {
+		return self::ACSS_PARENT_SLUG;
+	}
+
+	protected function is_supported_acss_version( string $version ): bool {
+		$major = (int) strtok( ltrim( $version ), '.' );
+
+		return $major >= 4;
 	}
 }

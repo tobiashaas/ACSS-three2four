@@ -3,11 +3,11 @@ Contributors: tobiashaas
 Requires at least: 6.0
 Requires PHP: 8.0
 Tested up to: 6.8
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-Migrates Automatic.css v2/v3 data to v4 format in Bricks Builder sites.
+Migriert Bricks Websites mit ACSS3 zu ACSS4.
 
 == Description ==
 
@@ -54,6 +54,12 @@ Standalone color channel variables such as `--primary-h`, `--primary-r`, or simi
 Yes. The migration updates WordPress options and post meta in place.
 
 == Changelog ==
+
+= 1.0.2 =
+
+* Allow ACSS 4 prerelease versions like RC, beta, and dev builds.
+* Show the migration screen as an ACSS submenu with a Tools fallback.
+* Update the plugin description and plugin website link.
 
 = 1.0.1 =
 

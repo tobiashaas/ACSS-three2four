@@ -9,13 +9,14 @@ if ( ! defined( 'ACSS3TO4_FILE' ) ) {
 }
 
 if ( ! defined( 'ACSS3TO4_VERSION' ) ) {
-	define( 'ACSS3TO4_VERSION', '1.0.1' );
+	define( 'ACSS3TO4_VERSION', '1.0.2' );
 }
 
 $GLOBALS['acss_test_options']    = [];
 $GLOBALS['acss_test_transients'] = [];
 $GLOBALS['acss_test_actions']    = [];
 $GLOBALS['acss_test_management_pages'] = [];
+$GLOBALS['acss_test_submenu_pages'] = [];
 $GLOBALS['acss_test_styles']     = [];
 $GLOBALS['acss_test_scripts']    = [];
 $GLOBALS['acss_test_localized']  = [];
@@ -89,6 +90,12 @@ if ( ! function_exists( 'add_management_page' ) ) {
 	}
 }
 
+if ( ! function_exists( 'add_submenu_page' ) ) {
+	function add_submenu_page( string $parent_slug, string $page_title, string $menu_title, string $capability, string $menu_slug, $callback ): void {
+		$GLOBALS['acss_test_submenu_pages'][] = compact( 'parent_slug', 'page_title', 'menu_title', 'capability', 'menu_slug', 'callback' );
+	}
+}
+
 if ( ! function_exists( 'maybe_unserialize' ) ) {
 	function maybe_unserialize( $data ) {
 		return $data;
@@ -141,6 +148,12 @@ if ( ! function_exists( 'wp_localize_script' ) ) {
 if ( ! function_exists( 'admin_url' ) ) {
 	function admin_url( string $path = '' ): string {
 		return 'https://example.com/wp-admin/' . ltrim( $path, '/' );
+	}
+}
+
+if ( ! function_exists( 'esc_html' ) ) {
+	function esc_html( string $text ): string {
+		return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );
 	}
 }
 
