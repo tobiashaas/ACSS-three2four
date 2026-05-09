@@ -46,15 +46,35 @@
 			setStatus( 'step2', 'running' );
 
 			let offset         = 0;
-			let total          = 1;
+			let total          = 0;
 			let totalConverted = 0;
 			let totalFlagged   = 0;
 			const flaggedIds   = [];
 
-			while ( offset < total ) {
+			while ( true ) {
 				const res  = await ajax( 'acss3to4_step2', { offset } );
-				offset     = res.processed;
-				total      = res.total || 1;
+				if ( res.success === false ) {
+					setStatus( 'step2', 'error' );
+					throw new Error( 'Step 2 failed: ' + ( res.data || res.message || '' ) );
+				}
+
+				const nextOffset = Number( res.processed || 0 );
+				const nextTotal  = Number( res.total || 0 );
+
+				if ( nextTotal <= 0 ) {
+					total  = 0;
+					offset = 0;
+					setProgress( 'step2', 0, 0 );
+					break;
+				}
+
+				if ( nextOffset <= offset && nextTotal > offset ) {
+					setStatus( 'step2', 'error' );
+					throw new Error( 'Step 2 stalled before completing all posts.' );
+				}
+
+				offset     = nextOffset;
+				total      = nextTotal;
 				totalConverted += res.converted || 0;
 				totalFlagged   += res.flagged   || 0;
 
@@ -63,11 +83,18 @@
 				}
 
 				setProgress( 'step2', offset, total );
+
+				if ( offset >= total ) {
+					break;
+				}
 			}
 
 			setStatus( 'step2', 'done' );
 
 			let msg = '✓ ' + total + ' posts scanned — ' + totalConverted + ' conversions';
+			if ( total === 0 ) {
+				msg = '✓ No Bricks posts found for Step 2.';
+			}
 			if ( totalFlagged > 0 ) {
 				const ids = [ ...new Set( flaggedIds ) ].join( ', #' );
 				msg      += ', ' + totalFlagged + ' flagged for manual review → posts: #' + ids;

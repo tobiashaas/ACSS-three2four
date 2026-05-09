@@ -124,6 +124,44 @@ final class ACSS_Migrators_Test extends TestCase {
 		$this->assertStringContainsString( 'var(--primary)', $saved[0]['children'][0]['settings']['_css'] );
 	}
 
+	public function test_elements_migrator_returns_zero_progress_when_no_bricks_posts_exist(): void {
+		$transformer = new ACSS_CSS_Transformer();
+		$migrator    = new ACSS_Elements_Migrator( $transformer );
+
+		$GLOBALS['wpdb'] = new class() {
+			public string $postmeta = 'wp_postmeta';
+
+			public function prepare( string $query, ...$args ): string {
+				if ( 1 === count( $args ) && is_array( $args[0] ) ) {
+					$args = $args[0];
+				}
+
+				return vsprintf( str_replace( '%s', "'%s'", $query ), $args );
+			}
+
+			public function get_var( string $query ): string {
+				return '0';
+			}
+
+			public function get_col( string $query ): array {
+				return [];
+			}
+		};
+
+		$result = $migrator->run_batch( 0 );
+
+		$this->assertSame(
+			[
+				'processed'   => 0,
+				'total'       => 0,
+				'converted'   => 0,
+				'flagged'     => 0,
+				'flagged_ids' => [],
+			],
+			$result
+		);
+	}
+
 	public function test_global_classes_migrator_persists_flagged_css_comments(): void {
 		$transformer = new ACSS_CSS_Transformer();
 		$migrator    = new ACSS_Global_Classes_Migrator( $transformer );
