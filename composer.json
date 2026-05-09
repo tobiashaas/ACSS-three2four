@@ -1,0 +1,9 @@
+{
+    "name": "tobiashaas/acss3-to-4",
+    "require": {
+        "php": ">=8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10"
+    }
+}
