@@ -9,7 +9,7 @@ if ( ! defined( 'ACSS3TO4_FILE' ) ) {
 }
 
 if ( ! defined( 'ACSS3TO4_VERSION' ) ) {
-	define( 'ACSS3TO4_VERSION', '1.0.4' );
+	define( 'ACSS3TO4_VERSION', '1.0.5' );
 }
 
 $GLOBALS['acss_test_options']    = [];

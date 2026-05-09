@@ -4,6 +4,7 @@ docs/
 tests/
 vendor/
 .gitignore
+.distignore
 agent.md
 composer.json
 composer.lock

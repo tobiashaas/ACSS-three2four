@@ -24,8 +24,8 @@ jobs:
 
           mkdir -p "$STAGE_DIR"
           rsync -av ./ "$STAGE_DIR"/ --exclude-from=".distignore"
-          cd "$STAGE_DIR"
-          zip -r "../$(basename "$ZIP_PATH")" .
+          cd dist
+          zip -r "$(basename "$ZIP_PATH")" "acss3-to-4"
 
       - name: Upload release ZIP
         uses: softprops/action-gh-release@v2
