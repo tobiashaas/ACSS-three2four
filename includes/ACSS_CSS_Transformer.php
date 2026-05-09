@@ -52,7 +52,7 @@ class ACSS_CSS_Transformer {
 
 	private function convert_hsl_tuples( string $css, int &$converted ): string {
 		$c       = $this->color_pattern();
-		$pattern = '/hsl\(\s*var\(\s*--(' . $c . ')-hsl\s*\)\s*(?:\/\s*([^)]+))?\s*\)/i';
+		$pattern = '/hsl\(\s*var\(\s*--(' . $c . ')-hsl\s*\)\s*(?:\/\s*([^()]*(?:\([^)]*\)[^()]*)*))?\s*\)/i';
 
 		return preg_replace_callback(
 			$pattern,
@@ -86,7 +86,7 @@ class ACSS_CSS_Transformer {
 
 	private function convert_hsl_component_calls( string $css, int &$converted ): string {
 		$c       = $this->color_pattern();
-		$pattern = '/hsla?\(\s*var\(\s*--(' . $c . ')-h\s*\)\s*,\s*var\(\s*--\1-s\s*\)%\s*,\s*var\(\s*--\1-l\s*\)%(?:\s*,\s*([^)]+))?\s*\)/i';
+		$pattern = '/hsla?\(\s*var\(\s*--(' . $c . ')-h\s*\)\s*,\s*var\(\s*--\1-s\s*\)%\s*,\s*var\(\s*--\1-l\s*\)%(?:\s*,\s*([^()]*(?:\([^)]*\)[^()]*)*))?s*\)/i';
 
 		return preg_replace_callback(
 			$pattern,
@@ -207,6 +207,11 @@ class ACSS_CSS_Transformer {
 			$float     = max( 0, min( 100, $float ) );
 			$formatted = rtrim( rtrim( sprintf( '%.4f', $float ), '0' ), '.' );
 			return $formatted . '%';
+		}
+
+		// Pass calc() expressions through unchanged to avoid double-wrapping.
+		if ( preg_match( '/^calc\s*\(/i', $value ) ) {
+			return $value;
 		}
 
 		return 'calc(' . $value . ' * 100%)';

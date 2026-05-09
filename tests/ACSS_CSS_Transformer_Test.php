@@ -117,6 +117,13 @@ class ACSS_CSS_Transformer_Test extends TestCase {
 		$this->assertSame( 0, $r['flagged'] );
 	}
 
+	public function test_hsl_tuple_with_calc_alpha(): void {
+		$r = $this->t->transform( 'color: hsl(var(--primary-hsl) / calc(0.5 + 0.2));' );
+		$this->assertStringContainsString( 'color-mix(in oklab, var(--primary)', $r['css'] );
+		$this->assertStringNotContainsString( 'calc(calc(', $r['css'] );
+		$this->assertSame( 1, $r['converted'] );
+	}
+
 	public function test_all_color_tokens_supported(): void {
 		foreach ( [ 'primary', 'secondary', 'tertiary', 'accent', 'base', 'neutral', 'info', 'success', 'warning', 'danger' ] as $color ) {
 			$r = $this->t->transform( "color: var(--{$color}-hsl);" );
