@@ -85,6 +85,10 @@ class ACSS_Elements_Migrator {
 				$modified = false;
 
 				foreach ( $elements as &$element ) {
+					if ( ! is_array( $element ) ) {
+						continue;
+					}
+
 					$element_modified = false;
 					$result           = $this->transform_element( $element, $element_modified );
 
