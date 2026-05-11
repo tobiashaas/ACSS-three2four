@@ -50,6 +50,7 @@
 			let totalConverted = 0;
 			let totalFlagged   = 0;
 			const flaggedIds   = [];
+			const details      = [];
 
 			while ( true ) {
 				const res  = await ajax( 'acss3to4_step2', { offset } );
@@ -77,6 +78,9 @@
 				total      = nextTotal;
 				totalConverted += res.converted || 0;
 				totalFlagged   += res.flagged   || 0;
+				if ( Array.isArray( res.details ) && res.details.length ) {
+					details.push( ...res.details );
+				}
 
 				if ( res.flagged_ids && res.flagged_ids.length ) {
 					flaggedIds.push( ...res.flagged_ids );
@@ -100,13 +104,22 @@
 				msg      += ', ' + totalFlagged + ' flagged for manual review → posts: #' + ids;
 			}
 			addLog( msg, totalFlagged > 0 ? 'warning' : 'success' );
+			renderPostDetails( details );
 		}
 
 		async function runStep3() {
 			setStatus( 'step3', 'running' );
 			const res = await ajax( 'acss3to4_step3', {} );
 			setStatus( 'step3', 'done' );
-			addLog( '✓ bricks_global_classes: ' + ( res.updated_count || 0 ) + ' class names updated', 'success' );
+			let msg = '✓ bricks_global_classes: ' + ( res.updated_count || 0 ) + ' class names updated';
+			if ( res.converted || res.flagged ) {
+				msg += ' — ' + ( res.converted || 0 ) + ' value conversions';
+				if ( res.flagged ) {
+					msg += ', ' + res.flagged + ' flagged';
+				}
+			}
+			addLog( msg, res.flagged ? 'warning' : 'success' );
+			renderClassDetails( res.details || [] );
 		}
 
 		function ajax( action, data ) {
@@ -138,6 +151,66 @@
 			li.textContent = message;
 			li.className   = 'log-' + type;
 			list.appendChild( li );
+		}
+
+		function renderPostDetails( details ) {
+			if ( ! Array.isArray( details ) || ! details.length ) {
+				return;
+			}
+
+			details.forEach( function ( detail ) {
+				const sampleText = formatSamples( detail.samples );
+				let message = '  Post #' + detail.post_id + ' [' + detail.meta_key + ']: '
+					+ ( detail.converted || 0 ) + ' converted';
+				if ( detail.flagged ) {
+					message += ', ' + detail.flagged + ' flagged';
+				}
+				if ( sampleText ) {
+					message += ' — ' + sampleText;
+				}
+				addLog( message, detail.flagged ? 'warning' : 'success' );
+			} );
+		}
+
+		function renderClassDetails( details ) {
+			if ( ! Array.isArray( details ) || ! details.length ) {
+				return;
+			}
+
+			details.forEach( function ( detail ) {
+				const sampleText = formatSamples( detail.samples );
+				let message = '  Class ' + ( detail.class_name || '(unnamed)' ) + ': ';
+				if ( detail.renamed ) {
+					message += 'name updated';
+				} else {
+					message += 'name unchanged';
+				}
+				if ( detail.converted || detail.flagged ) {
+					message += ', ' + ( detail.converted || 0 ) + ' converted';
+					if ( detail.flagged ) {
+						message += ', ' + detail.flagged + ' flagged';
+					}
+				}
+				if ( sampleText ) {
+					message += ' — ' + sampleText;
+				}
+				addLog( message, detail.flagged ? 'warning' : 'success' );
+			} );
+		}
+
+		function formatSamples( samples ) {
+			if ( ! Array.isArray( samples ) || ! samples.length ) {
+				return '';
+			}
+
+			return samples.slice( 0, 2 ).map( function ( sample ) {
+				return sample.path + ': ' + shorten( sample.before ) + ' -> ' + shorten( sample.after );
+			} ).join( ' | ' );
+		}
+
+		function shorten( value ) {
+			const stringValue = String( value || '' );
+			return stringValue.length > 80 ? stringValue.slice( 0, 77 ) + '...' : stringValue;
 		}
 	} );
 }() );

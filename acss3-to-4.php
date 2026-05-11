@@ -3,7 +3,7 @@
  * Plugin Name: ACSS3 to ACSS4
  * Plugin URI:  https://bricks2etch.com/
  * Description: Migriert Bricks Websites mit ACSS3 zu ACSS4.
- * Version:     1.0.7
+ * Version:     1.0.8
  * Update URI:  https://github.com/tobiashaas/ACSS-three2four/
  * Requires at least: 6.0
  * Requires PHP: 8.0
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'ACSS3TO4_FILE', __FILE__ );
-define( 'ACSS3TO4_VERSION', '1.0.7' );
+define( 'ACSS3TO4_VERSION', '1.0.8' );
 
 require_once __DIR__ . '/includes/ACSS_CSS_Transformer.php';
 require_once __DIR__ . '/includes/Migrators/ACSS_Settings_Migrator.php';

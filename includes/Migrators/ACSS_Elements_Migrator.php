@@ -7,6 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class ACSS_Elements_Migrator {
 
 	private const BATCH_SIZE = 20;
+	private const MAX_SAMPLES_PER_DETAIL = 5;
 
 	private const META_KEYS = [
 		'_bricks_page_content',
@@ -42,7 +43,7 @@ class ACSS_Elements_Migrator {
 	 * Process one batch of posts starting at $offset.
 	 *
 	 * @param int $offset Number of posts already processed.
-	 * @return array{processed: int, total: int, converted: int, flagged: int, flagged_ids: int[]}
+	 * @return array{processed: int, total: int, converted: int, flagged: int, flagged_ids: int[], details: array<int, array<string, mixed>>}
 	 */
 	public function run_batch( int $offset ): array {
 		global $wpdb;
@@ -64,6 +65,7 @@ class ACSS_Elements_Migrator {
 		$converted   = 0;
 		$flagged     = 0;
 		$flagged_ids = [];
+		$details     = [];
 
 		foreach ( $post_ids as $raw_id ) {
 			$post_id      = (int) $raw_id;
@@ -83,23 +85,20 @@ class ACSS_Elements_Migrator {
 				}
 
 				$modified = false;
+				$result   = $this->transform_value( $elements, '', $modified );
 
-				foreach ( $elements as &$element ) {
-					if ( ! is_array( $element ) ) {
-						continue;
-					}
-
-					$element_modified = false;
-					$result           = $this->transform_element( $element, $element_modified );
-
-					$converted    += $result['converted'];
-					$post_flagged += $result['flagged'];
-					$modified      = $modified || $element_modified;
-				}
-				unset( $element );
+				$converted    += $result['converted'];
+				$post_flagged += $result['flagged'];
 
 				if ( $modified ) {
 					update_post_meta( $post_id, $meta_key, $elements );
+					$details[] = [
+						'post_id'   => $post_id,
+						'meta_key'  => $meta_key,
+						'converted' => $result['converted'],
+						'flagged'   => $result['flagged'],
+						'samples'   => $result['samples'],
+					];
 				}
 			}
 
@@ -114,39 +113,56 @@ class ACSS_Elements_Migrator {
 			'total'       => $total,
 			'converted'   => $converted,
 			'flagged'     => $flagged,
+			'details'     => $details,
 			'flagged_ids' => $flagged_ids,
 		];
 	}
 
 	/**
-	 * @param array<string, mixed> $element
-	 * @param bool                 $modified Set to true when the element tree changes.
-	 * @return array{converted: int, flagged: int}
+	 * @param mixed  $value
+	 * @param string $path
+	 * @param bool   $modified Set to true when the value tree changes.
+	 * @return array{converted: int, flagged: int, samples: array<int, array<string, string>>}
 	 */
-	private function transform_element( array &$element, bool &$modified ): array {
+	private function transform_value( &$value, string $path, bool &$modified ): array {
 		$converted = 0;
 		$flagged   = 0;
+		$samples   = [];
 
-		if ( isset( $element['settings']['_css'] ) && '' !== $element['settings']['_css'] ) {
-			$result = $this->transformer->transform( $element['settings']['_css'] );
+		if ( is_string( $value ) && '' !== $value ) {
+			$result = $this->transformer->transform( $value );
 
 			if ( $result['converted'] > 0 || $result['flagged'] > 0 ) {
-				$element['settings']['_css'] = $result['css'];
-				$converted                  += $result['converted'];
-				$flagged                    += $result['flagged'];
-				$modified                    = true;
+				$original  = $value;
+				$value     = $result['css'];
+				$converted = $result['converted'];
+				$flagged   = $result['flagged'];
+				$modified  = true;
+				$samples[] = [
+					'path'   => ltrim( $path, '.' ),
+					'before' => $original,
+					'after'  => $result['css'],
+				];
 			}
+
+			return [
+				'converted' => $converted,
+				'flagged'   => $flagged,
+				'samples'   => $samples,
+			];
 		}
 
-		if ( isset( $element['children'] ) && is_array( $element['children'] ) ) {
-			foreach ( $element['children'] as &$child ) {
-				if ( ! is_array( $child ) ) {
-					continue;
-				}
-
-				$child_result = $this->transform_element( $child, $modified );
+		if ( is_array( $value ) ) {
+			foreach ( $value as $key => &$child ) {
+				$child_path   = '' === $path ? (string) $key : $path . '.' . $key;
+				$child_result = $this->transform_value( $child, $child_path, $modified );
 				$converted   += $child_result['converted'];
 				$flagged     += $child_result['flagged'];
+				$samples      = array_merge( $samples, $child_result['samples'] );
+
+				if ( count( $samples ) > self::MAX_SAMPLES_PER_DETAIL ) {
+					$samples = array_slice( $samples, 0, self::MAX_SAMPLES_PER_DETAIL );
+				}
 			}
 			unset( $child );
 		}
@@ -154,6 +170,7 @@ class ACSS_Elements_Migrator {
 		return [
 			'converted' => $converted,
 			'flagged'   => $flagged,
+			'samples'   => $samples,
 		];
 	}
 }

@@ -3,7 +3,7 @@ Contributors: tobiashaas
 Requires at least: 6.0
 Requires PHP: 8.0
 Tested up to: 6.8
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -54,6 +54,11 @@ Standalone color channel variables such as `--primary-h`, `--primary-r`, or simi
 Yes. The migration updates WordPress options and post meta in place.
 
 == Changelog ==
+
+= 1.0.8 =
+
+* Scan Bricks data recursively and migrate recognized ACSS tokens beyond dedicated custom CSS fields.
+* Add detailed migration logs for changed posts and global classes, including compact before/after samples.
 
 = 1.0.7 =
 
